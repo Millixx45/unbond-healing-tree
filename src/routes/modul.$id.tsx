@@ -7,7 +7,7 @@ import { ArrowLeft, BookOpen, Stethoscope, Sparkles, Activity, Microscope, ListC
 export const Route = createFileRoute("/modul/$id")({
   head: ({ params }) => {
     const id = Number(params.id);
-    const title = MODULE_TITLES[numericId] ?? "Modul";
+    const title = MODULE_TITLES[id] ?? "Modul";
     return {
       meta: [
         { title: `Modul ${id} · ${title} – UNBOND` },
