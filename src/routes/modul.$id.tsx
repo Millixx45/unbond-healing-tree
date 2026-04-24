@@ -19,7 +19,7 @@ export const Route = createFileRoute("/modul/$id")({
   },
   loader: ({ params }) => {
     const id = Number(params.id);
-    if (!Number.isInteger(id) || id < 1 || id > 10) throw notFound();
+    if (!Number.isInteger(id) || id < 0 || id > 10) throw notFound();
     return { id };
   },
   component: ModulePage,
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/modul/$id")({
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="glass max-w-md p-8 text-center">
         <h1 className="text-3xl" style={{ color: "var(--bordeaux)" }}>Modul nicht gefunden</h1>
-        <p className="mt-3 text-sm text-muted-foreground">Es gibt nur Module 1 bis 10.</p>
+        <p className="mt-3 text-sm text-muted-foreground">Es gibt nur Module 0 bis 10.</p>
         <Link to="/dashboard" className="mt-6 inline-block rounded-full px-5 py-2 text-sm font-display tracking-brand uppercase text-primary-foreground" style={{ backgroundColor: "var(--terracotta)" }}>
           Zum Dashboard
         </Link>
@@ -74,7 +74,7 @@ function ModulePage() {
 
         <header className="mt-4 mb-10">
           <p className="text-xs tracking-brand uppercase" style={{ color: "var(--mauve)" }}>
-            Modul {numericId} von 10
+            {numericId === 0 ? "Auftakt" : `Modul ${numericId} von 10`}
           </p>
           <h1 className="mt-2 text-3xl sm:text-5xl" style={{ color: "var(--bordeaux)" }}>
             {title}
