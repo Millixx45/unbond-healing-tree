@@ -7,7 +7,7 @@ import { ArrowLeft, BookOpen, Stethoscope, Sparkles, Activity, Microscope, ListC
 export const Route = createFileRoute("/modul/$id")({
   head: ({ params }) => {
     const id = Number(params.id);
-    const title = MODULE_TITLES[id] ?? "Modul";
+    const title = MODULE_TITLES[numericId] ?? "Modul";
     return {
       meta: [
         { title: `Modul ${id} · ${title} – UNBOND` },
@@ -56,8 +56,8 @@ const SECTIONS = [
 function ModulePage() {
   const { id } = Route.useParams();
   const numericId = Number(id);
-  const progress = useModuleProgress(id);
-  const title = MODULE_TITLES[id] ?? "Modul";
+  const progress = useModuleProgress(numericId);
+  const title = MODULE_TITLES[numericId] ?? "Modul";
 
   return (
     <div className="min-h-screen pb-24">
@@ -74,7 +74,7 @@ function ModulePage() {
 
         <header className="mt-4 mb-10">
           <p className="text-xs tracking-brand uppercase" style={{ color: "var(--mauve)" }}>
-            Modul {id} von 10
+            Modul {numericId} von 10
           </p>
           <h1 className="mt-2 text-3xl sm:text-5xl" style={{ color: "var(--bordeaux)" }}>
             {title}
@@ -158,7 +158,7 @@ function ModulePage() {
                         onChange={(e) => {
                           const next = [...progress.goals];
                           next[i] = e.target.checked;
-                          writeModuleGoals(id, next);
+                          writeModuleGoals(numericId, next);
                         }}
                         className="h-4 w-4 accent-[color:var(--mauve)]"
                       />
@@ -174,7 +174,7 @@ function ModulePage() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => writeModuleComplete(id, !progress.completed)}
+                  onClick={() => writeModuleComplete(numericId, !progress.completed)}
                   className="rounded-full px-5 py-2 text-xs font-display tracking-brand uppercase text-primary-foreground"
                   style={{ backgroundColor: progress.completed ? "var(--sage)" : "var(--terracotta)" }}
                 >
