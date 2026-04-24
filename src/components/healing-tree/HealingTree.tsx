@@ -10,14 +10,15 @@ type Props = {
 /**
  * UNBOND – Healing Tree
  *
- * Bildsprache: edles Fineline-Botanik-Tattoo.
+ * Bildsprache: edles Fineline-Botanik-Tattoo, inspiriert von einer runden,
+ * fraktalen Baum-Silhouette (Referenz: Aquarell-„Tree of Life").
  *
- *  • Organische, leicht fraktale Verzweigung (keine geometrischen Kegel).
- *  • 11 dicke, kahle "Pfad-Äste" für Module 0–10 = der klare Weg in die Freiheit.
- *  • Dünne, belaubte "Chaos-Äste" als ruhiger Hintergrund (alte Bindungen).
- *  • Initial-Palette: Graphite (#4A4E52) für Stamm, Pfad-Äste und Belaubung.
- *  • Pfad-Äste tragen erst dann Sage-Blätter & Mauve-Blüten, wenn der/die
- *    Nutzer:in den jeweiligen Modul-Fortschritt gemacht hat.
+ *  • Organische, fraktale Verzweigung aus einem eleganten Stamm.
+ *  • Runde, dichte Krone aus feinen Chaos-Ästen + sanftem Laub im Hintergrund.
+ *  • 11 deutlich sichtbare, KAHLE Pfad-Äste (M0..M10) – der Weg der Nutzerin.
+ *    Sie liegen vor dem Chaos, sind dicker und bleiben unbelaubt, bis ein
+ *    Modul abgeschlossen ist.
+ *  • Sage-Blatt erscheint bei abgeschlossenem Modul, Mauve-Blüte bei ≥3/5 Zielen.
  */
 
 const VIEW_W = 600;
@@ -26,108 +27,124 @@ const VIEW_H = 720;
 // Graphite-Palette als oklch-Äquivalente von #4A4E52
 const GRAPHITE = "oklch(0.36 0.005 240)";
 const GRAPHITE_SOFT = "oklch(0.36 0.005 240 / 0.55)";
-const GRAPHITE_FAINT = "oklch(0.36 0.005 240 / 0.35)";
+const GRAPHITE_FAINT = "oklch(0.36 0.005 240 / 0.3)";
+const GRAPHITE_GHOST = "oklch(0.36 0.005 240 / 0.18)";
 
-// Spitze des Pfad-Asts, an der Blatt/Blüte ansetzen — von unten (Wurzel) nach oben (Krone)
+// Spitze des Pfad-Asts, an der Blatt/Blüte ansetzt — von unten nach oben
 type Slot = { id: number; tip: { x: number; y: number }; rotate: number };
 
+// Krone reicht von ca. y=80 (Krone oben) bis y=520 (Krone unten),
+// Stammgabelung bei ca. y=470. Pfad-Äste fächern sich kreisförmig auf.
 const SLOTS: Slot[] = [
-  { id: 0,  tip: { x: 300, y: 612 }, rotate:   0 }, // Auftakt – am Ansatz, mittig
-  { id: 1,  tip: { x: 188, y: 540 }, rotate: -28 },
-  { id: 2,  tip: { x: 412, y: 530 }, rotate:  26 },
-  { id: 3,  tip: { x: 142, y: 438 }, rotate: -22 },
-  { id: 4,  tip: { x: 458, y: 428 }, rotate:  20 },
-  { id: 5,  tip: { x: 196, y: 348 }, rotate: -16 },
-  { id: 6,  tip: { x: 408, y: 338 }, rotate:  14 },
-  { id: 7,  tip: { x: 158, y: 252 }, rotate: -12 },
-  { id: 8,  tip: { x: 446, y: 244 }, rotate:  10 },
-  { id: 9,  tip: { x: 244, y: 158 }, rotate:  -6 },
-  { id: 10, tip: { x: 360, y: 110 }, rotate:   4 },
+  { id: 0,  tip: { x: 300, y: 500 }, rotate:   0 }, // Auftakt – kurz, mittig unten in der Krone
+  { id: 1,  tip: { x: 196, y: 470 }, rotate: -55 }, // links unten
+  { id: 2,  tip: { x: 404, y: 470 }, rotate:  55 }, // rechts unten
+  { id: 3,  tip: { x: 138, y: 380 }, rotate: -75 }, // links außen
+  { id: 4,  tip: { x: 462, y: 380 }, rotate:  75 }, // rechts außen
+  { id: 5,  tip: { x: 130, y: 280 }, rotate: -82 }, // links Mitte
+  { id: 6,  tip: { x: 470, y: 280 }, rotate:  82 }, // rechts Mitte
+  { id: 7,  tip: { x: 178, y: 168 }, rotate: -42 }, // links oben
+  { id: 8,  tip: { x: 422, y: 168 }, rotate:  42 }, // rechts oben
+  { id: 9,  tip: { x: 246, y:  96 }, rotate: -18 }, // Krone links
+  { id: 10, tip: { x: 354, y:  88 }, rotate:  18 }, // Krone rechts (höchster Punkt)
 ];
 
-// Bezier-Kurven der 11 dicken Pfad-Äste (vom Stamm zur Spitze)
+// Bezier-Kurven der 11 dicken Pfad-Äste – fraktal verzweigt aus dem Stamm
+// Stammgabelung bei ca. (300, 470). Jede Kurve nutzt geschwungene Bezier-Linien.
 const PATH_BRANCHES: string[] = [
-  // M0 – kurzer, mittiger Auftakt-Ast aus dem Stammansatz
-  "M 300 638 C 300 628, 300 622, 300 612",
-  // M1
-  "M 296 568 C 270 562, 230 552, 188 540",
-  // M2
-  "M 304 558 C 332 552, 372 544, 412 530",
-  // M3
-  "M 294 470 C 240 460, 188 450, 142 438",
-  // M4
-  "M 306 460 C 360 450, 412 440, 458 428",
-  // M5
-  "M 296 380 C 262 370, 226 358, 196 348",
-  // M6
-  "M 304 372 C 340 364, 376 354, 408 338",
-  // M7
-  "M 294 290 C 244 278, 196 264, 158 252",
-  // M8
-  "M 306 282 C 358 270, 408 258, 446 244",
-  // M9
-  "M 300 200 C 286 188, 264 174, 244 158",
-  // M10
-  "M 304 150 C 322 138, 344 122, 360 110",
+  // M0 – kurzer Auftakt-Ast nach oben aus der Stammgabelung
+  "M 300 478 C 300 488, 300 494, 300 500",
+  // M1 – schwingt nach links unten
+  "M 286 472 C 260 470, 230 470, 196 470",
+  // M2 – schwingt nach rechts unten
+  "M 314 472 C 340 470, 370 470, 404 470",
+  // M3 – steigt links außen, sanfter Bogen
+  "M 282 460 C 230 446, 180 420, 138 380",
+  // M4 – steigt rechts außen
+  "M 318 460 C 370 446, 420 420, 462 380",
+  // M5 – nach links zur Mitte der Krone
+  "M 280 440 C 220 400, 170 350, 130 280",
+  // M6 – Spiegelung nach rechts
+  "M 320 440 C 380 400, 430 350, 470 280",
+  // M7 – steigt diagonal nach links oben
+  "M 290 420 C 260 350, 220 250, 178 168",
+  // M8 – steigt diagonal nach rechts oben
+  "M 310 420 C 340 350, 380 250, 422 168",
+  // M9 – streckt sich zur linken Krone
+  "M 296 400 C 280 320, 270 220, 246 96",
+  // M10 – streckt sich zur rechten Krone (Spitze)
+  "M 304 400 C 320 320, 340 200, 354 88",
 ];
 
-// Dünne, belaubte "Chaos-Äste" – feines Botanik-Geflecht im Hintergrund
+// Dünne Chaos-Äste – fraktales Geflecht im Hintergrund (alte Bindungen)
 const CHAOS_BRANCHES: string[] = [
-  "M 295 590 C 250 600, 215 605, 178 612",
-  "M 305 585 C 348 596, 388 602, 430 612",
-  "M 296 510 C 248 514, 210 522, 168 532",
-  "M 304 508 C 348 514, 390 522, 432 530",
-  "M 295 445 C 252 444, 214 446, 174 452",
-  "M 305 440 C 350 442, 392 446, 434 452",
-  "M 295 378 C 248 384, 212 392, 174 402",
-  "M 305 372 C 352 376, 388 384, 430 396",
-  "M 296 320 C 248 316, 214 314, 176 314",
-  "M 304 316 C 348 318, 388 322, 426 326",
-  "M 295 248 C 254 252, 220 258, 184 268",
-  "M 305 240 C 348 246, 386 254, 422 264",
-  "M 296 188 C 268 192, 244 200, 220 212",
-  "M 304 184 C 332 188, 358 196, 384 208",
-  "M 298 126 C 282 132, 268 142, 256 154",
-  "M 302 118 C 320 124, 336 134, 350 146",
-  // ein paar feinere "Verzweigungen" auf bestehenden Chaos-Ästen
-  "M 220 532 C 198 540, 178 548, 158 558",
-  "M 380 530 C 402 538, 422 546, 442 556",
-  "M 200 454 C 178 462, 160 470, 144 480",
-  "M 400 452 C 422 460, 440 468, 458 478",
-  "M 200 392 C 184 400, 170 408, 158 416",
-  "M 392 388 C 412 394, 428 402, 444 412",
+  // primäre Chaos-Äste, die aus dem Stamm wachsen (etwas anders als Pfad-Äste)
+  "M 300 470 C 250 460, 210 440, 170 410",
+  "M 300 470 C 350 460, 390 440, 430 410",
+  "M 300 460 C 240 420, 200 360, 170 290",
+  "M 300 460 C 360 420, 400 360, 430 290",
+  "M 300 450 C 270 380, 250 280, 230 180",
+  "M 300 450 C 330 380, 350 280, 370 180",
+  "M 300 440 C 290 350, 290 240, 290 130",
+  "M 300 440 C 310 350, 310 240, 310 130",
+  // sekundäre Verzweigungen (fraktal)
+  "M 220 400 C 200 380, 184 354, 172 326",
+  "M 380 400 C 400 380, 416 354, 428 326",
+  "M 200 350 C 178 332, 162 308, 152 282",
+  "M 400 350 C 422 332, 438 308, 448 282",
+  "M 240 280 C 222 252, 210 220, 204 188",
+  "M 360 280 C 378 252, 390 220, 396 188",
+  "M 270 200 C 258 168, 250 134, 248 104",
+  "M 330 200 C 342 168, 350 134, 352 104",
+  // tertiäre, ganz feine Verzweigungen (Fraktal-Tiefe)
+  "M 172 326 C 158 318, 144 312, 128 308",
+  "M 428 326 C 442 318, 456 312, 472 308",
+  "M 152 282 C 138 274, 124 268, 110 264",
+  "M 448 282 C 462 274, 476 268, 490 264",
+  "M 204 188 C 192 174, 184 156, 178 138",
+  "M 396 188 C 408 174, 416 156, 422 138",
+  "M 248 104 C 240 88, 234 72, 232 58",
+  "M 352 104 C 360 88, 366 72, 368 58",
+  // Querverzweigungen für runde Silhouette
+  "M 230 180 C 210 196, 196 216, 188 240",
+  "M 370 180 C 390 196, 404 216, 412 240",
+  "M 290 130 C 274 142, 264 158, 258 178",
+  "M 310 130 C 326 142, 336 158, 342 178",
 ];
 
-// Mehrere kleine Blatt-Cluster pro Chaos-Ast für dichten Hintergrund
+// Sanfte Laub-Cluster (ellipsen) im Chaos – ruhige Hintergrund-Belaubung
 type LeafDot = { x: number; y: number; r: number };
 const CHAOS_LEAVES: LeafDot[] = [
-  // unten
-  { x: 178, y: 612, r: 4 }, { x: 200, y: 608, r: 3 }, { x: 158, y: 615, r: 3 },
-  { x: 430, y: 612, r: 4 }, { x: 410, y: 608, r: 3 }, { x: 450, y: 614, r: 3 },
-  // mittel-unten
-  { x: 168, y: 532, r: 3.5 }, { x: 188, y: 528, r: 3 },
-  { x: 432, y: 530, r: 3.5 }, { x: 412, y: 526, r: 3 },
-  // mittel
-  { x: 174, y: 452, r: 3.5 }, { x: 196, y: 450, r: 3 },
-  { x: 434, y: 452, r: 3.5 }, { x: 414, y: 450, r: 3 },
-  // mittel-oben
-  { x: 174, y: 402, r: 3 }, { x: 196, y: 398, r: 2.5 },
-  { x: 430, y: 396, r: 3 }, { x: 410, y: 394, r: 2.5 },
-  // oberer Bereich
-  { x: 176, y: 314, r: 3 }, { x: 198, y: 316, r: 2.5 },
-  { x: 426, y: 326, r: 3 }, { x: 406, y: 322, r: 2.5 },
-  { x: 184, y: 268, r: 3 }, { x: 204, y: 264, r: 2.5 },
-  { x: 422, y: 264, r: 3 }, { x: 402, y: 260, r: 2.5 },
-  { x: 220, y: 212, r: 2.5 }, { x: 384, y: 208, r: 2.5 },
-  { x: 256, y: 154, r: 2.5 }, { x: 350, y: 146, r: 2.5 },
-  // feine Verzweigungs-Spitzen
-  { x: 158, y: 558, r: 2.5 }, { x: 442, y: 556, r: 2.5 },
-  { x: 144, y: 480, r: 2.5 }, { x: 458, y: 478, r: 2.5 },
-  { x: 158, y: 416, r: 2 }, { x: 444, y: 412, r: 2 },
+  // äußere Krone – runde Silhouette
+  { x: 128, y: 308, r: 4 }, { x: 116, y: 298, r: 3 }, { x: 140, y: 320, r: 3 },
+  { x: 472, y: 308, r: 4 }, { x: 484, y: 298, r: 3 }, { x: 460, y: 320, r: 3 },
+  { x: 110, y: 264, r: 3.5 }, { x: 100, y: 254, r: 2.5 },
+  { x: 490, y: 264, r: 3.5 }, { x: 500, y: 254, r: 2.5 },
+  // mittlere linke/rechte Seite
+  { x: 152, y: 282, r: 3 }, { x: 140, y: 270, r: 2.5 },
+  { x: 448, y: 282, r: 3 }, { x: 460, y: 270, r: 2.5 },
+  { x: 172, y: 326, r: 3 }, { x: 428, y: 326, r: 3 },
+  // oben
+  { x: 178, y: 138, r: 3 }, { x: 168, y: 124, r: 2.5 },
+  { x: 422, y: 138, r: 3 }, { x: 432, y: 124, r: 2.5 },
+  { x: 232, y: 58, r: 3 }, { x: 222, y: 46, r: 2.5 },
+  { x: 368, y: 58, r: 3 }, { x: 378, y: 46, r: 2.5 },
+  { x: 204, y: 188, r: 3 }, { x: 396, y: 188, r: 3 },
+  // mittlere Krone
+  { x: 188, y: 240, r: 3 }, { x: 412, y: 240, r: 3 },
+  { x: 258, y: 178, r: 2.8 }, { x: 342, y: 178, r: 2.8 },
+  { x: 248, y: 104, r: 2.8 }, { x: 352, y: 104, r: 2.8 },
+  // untere Krone
+  { x: 170, y: 410, r: 3.5 }, { x: 430, y: 410, r: 3.5 },
+  { x: 188, y: 396, r: 2.5 }, { x: 412, y: 396, r: 2.5 },
+  // diffuse innere Belaubung (sehr leicht)
+  { x: 270, y: 320, r: 2.2 }, { x: 330, y: 320, r: 2.2 },
+  { x: 280, y: 240, r: 2 }, { x: 320, y: 240, r: 2 },
+  { x: 290, y: 160, r: 2 }, { x: 310, y: 160, r: 2 },
+  { x: 260, y: 380, r: 2.2 }, { x: 340, y: 380, r: 2.2 },
 ];
 
 export function HealingTree({ modules, className }: Props) {
-  // Map id → progress (Module sind 0..10)
   const byId = new Map(modules.map((m) => [m.id, m]));
 
   return (
@@ -144,7 +161,11 @@ export function HealingTree({ modules, className }: Props) {
             <stop offset="0%" stopColor="oklch(0.61 0.06 320 / 0.18)" />
             <stop offset="100%" stopColor="oklch(0.61 0.06 320 / 0)" />
           </radialGradient>
-          {/* leichtes Glühen für aktive Pfad-Äste */}
+          {/* Sanftes Aura-Glühen hinter der Krone, damit der Pfad davorliegend wirkt */}
+          <radialGradient id="crown-aura" cx="0.5" cy="0.45" r="0.55">
+            <stop offset="0%" stopColor="oklch(0.96 0.02 80 / 0.55)" />
+            <stop offset="100%" stopColor="oklch(0.96 0.02 80 / 0)" />
+          </radialGradient>
           <filter id="leaf-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="2" result="blur" />
             <feMerge>
@@ -157,45 +178,47 @@ export function HealingTree({ modules, className }: Props) {
         {/* Boden-Glühen */}
         <ellipse cx="300" cy="678" rx="240" ry="36" fill="url(#ground-glow)" />
 
-        {/* Wurzeln – feines Linework */}
+        {/* Sanfte Krone-Aura, damit Chaos-Geflecht zurücktritt */}
+        <ellipse cx="300" cy="270" rx="240" ry="230" fill="url(#crown-aura)" />
+
+        {/* Wurzeln – feines Linework, organisch verzweigt */}
         <g
           stroke={GRAPHITE_SOFT}
           strokeWidth="1.4"
           strokeLinecap="round"
           fill="none"
         >
-          <path d="M 300 660 C 250 668, 200 674, 150 682" />
-          <path d="M 300 660 C 350 668, 400 674, 450 682" />
-          <path d="M 300 660 C 270 672, 240 680, 200 690" />
-          <path d="M 300 660 C 330 672, 360 680, 400 690" />
-          <path d="M 300 660 L 300 692" />
-          <path d="M 220 678 C 200 684, 184 688, 168 694" />
-          <path d="M 380 678 C 400 684, 416 688, 432 694" />
+          <path d="M 300 660 C 250 668, 200 674, 150 686" />
+          <path d="M 300 660 C 350 668, 400 674, 450 686" />
+          <path d="M 300 660 C 270 674, 240 686, 200 700" />
+          <path d="M 300 660 C 330 674, 360 686, 400 700" />
+          <path d="M 300 660 L 300 700" />
+          <path d="M 220 678 C 200 686, 184 692, 168 700" />
+          <path d="M 380 678 C 400 686, 416 692, 432 700" />
+          {/* feinere Wurzel-Verzweigungen */}
+          <path d="M 250 684 C 240 692, 232 698, 222 704" />
+          <path d="M 350 684 C 360 692, 368 698, 378 704" />
+          <path d="M 180 692 C 168 698, 158 702, 148 706" />
+          <path d="M 420 692 C 432 698, 442 702, 452 706" />
         </g>
 
-        {/* Stamm – elegant, leicht organisch */}
+        {/* Stamm – elegant, leicht organisch, gabelt sich oben in die Krone */}
         <path
           d="M 290 660
-             C 286 600, 282 540, 290 470
-             C 296 410, 290 350, 296 290
-             C 300 240, 296 190, 302 130
-             C 304 110, 304 95, 306 80
-             L 314 80
-             C 318 100, 320 140, 316 200
-             C 312 260, 318 320, 314 380
-             C 310 440, 318 510, 316 580
-             C 314 620, 316 645, 312 660 Z"
+             C 286 600, 282 540, 290 490
+             L 296 478
+             L 304 478
+             C 312 540, 314 600, 312 660 Z"
           fill={GRAPHITE}
         />
 
         {/* Subtile Stamm-Maserung */}
         <g stroke="oklch(0.30 0.005 240 / 0.45)" strokeWidth="0.6" fill="none">
-          <path d="M 300 640 C 298 580, 304 510, 300 440" />
-          <path d="M 305 600 C 308 540, 302 470, 308 400" />
-          <path d="M 302 380 C 300 320, 306 250, 304 180" />
+          <path d="M 296 640 C 294 580, 300 530, 296 490" />
+          <path d="M 304 620 C 306 560, 302 510, 308 480" />
         </g>
 
-        {/* CHAOS – dünne, belaubte Hintergrund-Äste */}
+        {/* CHAOS – fraktales Geflecht (Hintergrund, sehr fein) */}
         <g
           stroke={GRAPHITE_FAINT}
           strokeWidth="0.9"
@@ -205,6 +228,23 @@ export function HealingTree({ modules, className }: Props) {
           {CHAOS_BRANCHES.map((d, i) => (
             <path key={`c-${i}`} d={d} />
           ))}
+        </g>
+
+        {/* CHAOS – ganz feine zusätzliche Linien für Tattoo-Dichte */}
+        <g
+          stroke={GRAPHITE_GHOST}
+          strokeWidth="0.6"
+          strokeLinecap="round"
+          fill="none"
+        >
+          <path d="M 188 240 C 174 256, 164 274, 158 294" />
+          <path d="M 412 240 C 426 256, 436 274, 442 294" />
+          <path d="M 258 178 C 248 162, 240 144, 236 126" />
+          <path d="M 342 178 C 352 162, 360 144, 364 126" />
+          <path d="M 172 326 C 162 340, 156 354, 152 368" />
+          <path d="M 428 326 C 438 340, 444 354, 448 368" />
+          <path d="M 204 188 C 196 204, 192 220, 190 238" />
+          <path d="M 396 188 C 404 204, 408 220, 410 238" />
         </g>
 
         {/* CHAOS – feine Blätter (Graphite, klein, ruhig) */}
@@ -221,7 +261,7 @@ export function HealingTree({ modules, className }: Props) {
           ))}
         </g>
 
-        {/* PFAD – 11 dicke, kahle Pfad-Äste (der Weg in die Freiheit) */}
+        {/* PFAD – 11 dicke, kahle Pfad-Äste (DAVOR — der Weg in die Freiheit) */}
         <g
           stroke={GRAPHITE}
           strokeLinecap="round"
@@ -235,7 +275,7 @@ export function HealingTree({ modules, className }: Props) {
               <path
                 key={`p-${i}`}
                 d={d}
-                strokeWidth={active ? 4.5 : 3.8}
+                strokeWidth={active ? 4.8 : 4}
                 stroke={active ? "oklch(0.30 0.01 240)" : GRAPHITE}
               />
             );
