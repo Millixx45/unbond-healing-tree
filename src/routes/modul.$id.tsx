@@ -54,7 +54,8 @@ const SECTIONS = [
 ] as const;
 
 function ModulePage() {
-  const { id } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const numericId = Number(id);
   const progress = useModuleProgress(id);
   const title = MODULE_TITLES[id] ?? "Modul";
 
