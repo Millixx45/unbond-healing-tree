@@ -11,7 +11,8 @@ import { useCallback, useEffect, useState } from "react";
 const KEY_COMPLETE = (id: number) => `unbond_m${id}_complete`;
 const KEY_GOALS = (id: number) => `unbond_m${id}_goals`;
 
-export const TOTAL_MODULES = 10;
+export const TOTAL_MODULES = 11; // Modul 0 (Auftakt) + Module 1–10
+export const MODULE_IDS = Array.from({ length: TOTAL_MODULES }, (_, i) => i); // [0..10]
 
 export type ModuleProgress = {
   id: number;
@@ -72,7 +73,7 @@ export function writeModuleGoals(id: number, goals: boolean[]) {
 /** Reactive hook that re-renders when any module's progress changes. */
 export function useAllProgress(): ModuleProgress[] {
   const read = useCallback(
-    () => Array.from({ length: TOTAL_MODULES }, (_, i) => readModuleProgress(i + 1)),
+    () => MODULE_IDS.map((i) => readModuleProgress(i)),
     [],
   );
   const [state, setState] = useState<ModuleProgress[]>(read);
@@ -93,10 +94,11 @@ export function useAllProgress(): ModuleProgress[] {
 
 export function useModuleProgress(id: number): ModuleProgress {
   const all = useAllProgress();
-  return all[id - 1] ?? { id, completed: false, goals: emptyGoals(), goalsDone: 0, bloomed: false };
+  return all.find((m) => m.id === id) ?? { id, completed: false, goals: emptyGoals(), goalsDone: 0, bloomed: false };
 }
 
 export const MODULE_TITLES: Record<number, string> = {
+  0: "Auftakt",
   1: "Erkennen",
   2: "Benennen",
   3: "Verstehen",
