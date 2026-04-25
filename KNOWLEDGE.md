@@ -280,3 +280,28 @@ Default-Zustand: Der MeshGradient ist aktiv.
 Story-Trigger: Sobald eine Sektion vom Typ STORY gerendert wird, blendet der MeshGradient auf opacity: 0 und der SmokeBackground (Bordeaux) blendet sanft ein (transition: opacity 1.5s ease).
 
 Text-Overlay: Story-Texte liegen in einem Container mit z-index: 10 und nutzen framer-motion für ein verzögertes Einblenden der Sätze (Scroll-Reveal).
+15. Das „Wörterbuch des Grauens“ (Glossary & Tooltips)
+Identifikation: Fachbegriffe (z. B. Intermittierende Verstärkung, ACT-Defusion, Trauma-Bonding) werden im Text farblich in Mauve (#9B7FA4) hervorgehoben und dezent unterpunktet.
+
+Interaktion: * Desktop: Hover zeigt einen Glassmorphism-Tooltip mit einer kurzen, prägnanten Erklärung.
+
+Mobile: Tap öffnet ein kleines Bottom-Sheet oder Popover.
+
+Zentrale: Alle markierten Wörter werden automatisch in einer globalen Liste, dem „Wörterbuch des Grauens“, gesammelt. Dieses ist vom Dashboard aus erreichbar.
+
+Vibe: Die Erklärungen im Tooltip müssen „unbond-style“ sein: Psychologisch fundiert, aber in der Sprache des Überlebens (nicht trocken-akademisch).
+
+2. Der „Befehl“ für Manus für Kapitel 1
+Schicke Manus jetzt diese spezifische Anweisung hinterher:
+
+„Manus, ein extrem wichtiges Zusatz-Feature für alle Module:
+
+Implementiere ein Tooltip-System für Fachbegriffe.
+
+Markiere im Text von Kapitel 1 Wörter wie 'intermittierende Verstärkung', 'ACT-Defusion' und 'Trauma-Bonding' in Mauve.
+
+Erstelle beim Hover/Tap eine Tooltip-Box (Glassmorphism), die den Begriff erklärt.
+
+Wörterbuch des Grauens: Erstelle eine zentrale Datenstruktur (z. B. in src/lib/glossary.ts), in der diese Begriffe gespeichert werden. Das Ziel ist eine globale Glossar-Seite mit diesem Namen.
+
+Beispiel für Tooltip-Content (Intermittierende Verstärkung): > 'Das Prinzip Spielautomat: Mal gibt es Liebe, mal Kälte. Dein Gehirn wird süchtig nach dem nächsten Jackpot.'“
