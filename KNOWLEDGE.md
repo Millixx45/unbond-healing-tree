@@ -229,5 +229,54 @@ Die KI prüft selbst, bevor sie liefert:
 - [ ] `routeTree.gen.ts` **nicht** manuell editiert?
 
 ---
+12 Zukünftige Spezial-Komponenten (Backlog)
+Modul 7 („Loslassen“): Nutzung des SVGFollower-Patterns (Scribble-Animation).
 
+Zweck: Visualisierung von Ballast und emotionalem „Herausschreiben“.
+
+Vibe: Hier ist Unruhe und Chaos-Linienführung explizit erwünscht (therapeutischer Effekt).
+
+Technik: SVGFollower-Code liegt im Projekt-Archiv/Chat-Historie bereit.
 *Letzte Aktualisierung: T = 0 (Schritt 1 abgeschlossen, vor Schritt-2-Feedback).*
+
+14. Hintergrund-System & Story-Stage (Code-Vorgaben)
+Um den „Calm Luxury“-Vibe und die emotionale Trennung der Inhalte zu gewährleisten, nutzt die App zwei spezifische Hintergrund-Systeme.
+
+A. Globaler Ebook-Hintergrund (Mesh-Gradient)
+Einsatz: Standard für alle Modul-Seiten, Dashboard und Diagnose-Elemente.
+Vibe: Extrem langsam, beruhigend, „hochwertiges Papier“.
+
+TypeScript
+// Implementierung via @paper-design/shaders-react (oder CSS-Fallback)
+// Farben: Cream (#F5EFE6) und White (#FFFFFF)
+// Konfiguration:
+<MeshGradient 
+  colors={["#F5EFE6", "#FFFFFF", "#FDFBF7", "#F5EFE6"]}
+  speed={0.05}      // Fast statisch
+  distortion={0.3}  // Sehr weiche Übergänge
+  swirl={0.2} 
+  opacity={0.6}     // Dezent im Hintergrund
+/>
+B. Story-Stage: Mary & Sandra (WebGL Smoke)
+Einsatz: Exklusiv als Hintergrund für Element 1 (STORY).
+Vibe: Emotional, tiefgründig, „der Nebel der Vergangenheit“.
+Farbe: Bordeaux (#6B3E44)
+
+Manus Anweisung: Erstelle die Komponente SmokeBackground.tsx mit folgendem WebGL-Shader-Kern:
+
+OpenGL Shading Language
+// Fragment Shader Ausschnitt für Manus:
+precision highp float;
+uniform float time;
+uniform vec3 u_color; // Hier #6B3E44 einsteuern
+
+// Nutze FBM (Fractional Brownian Motion) für organischen Rauch
+// Der Rauch soll sanft wogen (time * 0.015)
+// Mischung: col = mix(col, u_color, 0.4); 
+// Text-Kontrast: Text über diesem Background IMMER in Cream (#F5EFE6)
+C. Logik der Hintergrund-Steuerung (The Switch)
+Default-Zustand: Der MeshGradient ist aktiv.
+
+Story-Trigger: Sobald eine Sektion vom Typ STORY gerendert wird, blendet der MeshGradient auf opacity: 0 und der SmokeBackground (Bordeaux) blendet sanft ein (transition: opacity 1.5s ease).
+
+Text-Overlay: Story-Texte liegen in einem Container mit z-index: 10 und nutzen framer-motion für ein verzögertes Einblenden der Sätze (Scroll-Reveal).
