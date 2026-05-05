@@ -64,7 +64,7 @@ Jede Modul-Route `/modul/$id` (id 0…10) **muss** exakt diese sechs Sektionen i
 | 1 | **Story** | `--bordeaux` | `BookOpen` | Mary & Sandra, Scroll-Reveal, immersiv |
 | 2 | **Diagnose** | `--sage` | `Stethoscope` | Sage-Box: psychologisch / neurobiologisch |
 | 3 | **Lösung · Der Shift** | `--mauve` | `Sparkles` | Perspektivwechsel, was darf neu gedacht werden |
-| 4 | **3 Mikro-Übungen** | `--terracotta` | `Activity` | **exakt 3** Übungs-Karten, niemals mehr/weniger |
+| 4 | **3 Mikro-Übungen** | `--terracotta` | `Activity` | **mindestens 3** Übungs-Karten|
 | 5 | **Deep Dive · Forschung** | `--sage` | `Microscope` | Akkordeon mit Studien, Quellen |
 | 6 | **Checkliste · 5 Ziele** | `--mauve` | `ListChecks` | **exakt 5** Ziele, 3-von-5-Regel triggert Blüte |
 
